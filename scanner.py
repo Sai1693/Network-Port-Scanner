@@ -67,3 +67,75 @@ def main():
 
 if __name__ == "__main__":
     main()
+"""
+import socket
+import threading
+from colorama import Fore, Style, init
+
+from banner import show_banner
+from utils import validate_ip, save_results
+
+init(autoreset=True)
+
+open_ports = []
+lock = threading.Lock()
+
+
+def scan_port(target, port):
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(0.5)
+
+        result = sock.connect_ex((target, port))
+
+        if result == 0:
+            with lock:
+                print(Fore.GREEN + f"[OPEN] Port {port}")
+                open_ports.append(port)
+
+        sock.close()
+
+    except:
+        pass
+
+
+def main():
+
+    show_banner()
+
+    target = input(Fore.CYAN + "Enter Target IP Address: ").strip()
+
+    if not validate_ip(target):
+        print(Fore.RED + "\nInvalid IP Address!")
+        return
+
+    print(Fore.YELLOW + "\nScanning ports 1-1024...\n")
+
+    threads = []
+
+    for port in range(1, 1025):
+        thread = threading.Thread(target=scan_port, args=(target, port))
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+    print(Fore.CYAN + "\n==============================")
+    print(Fore.CYAN + "      Scan Completed")
+    print(Fore.CYAN + "==============================")
+
+    if open_ports:
+        print(Fore.GREEN + f"\nTotal Open Ports Found: {len(open_ports)}")
+    else:
+        print(Fore.RED + "\nNo Open Ports Found.")
+
+    filename = save_results(target, sorted(open_ports))
+
+    print(Fore.BLUE + f"\nReport saved to: {filename}")
+
+    print(Style.RESET_ALL)
+
+
+if __name__ == "__main__":
+    main()"""
